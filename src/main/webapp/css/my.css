@@ -1,0 +1,28 @@
+/* Стили для заголовков */
+h1 {
+    color: blue;
+    font-size: 24px;
+}
+
+/* Стили для ссылок */
+a {
+    text-decoration: none;
+    color: #0066cc;
+}
+
+/* Стили для таблиц */
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+td, th {
+    border: 1px solid black;
+    padding: 8px;
+}
+
+/* Общие стили для всего документа */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+}

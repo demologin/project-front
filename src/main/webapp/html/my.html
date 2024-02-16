@@ -1,11 +1,58 @@
+<!DOCTYPE html>
 <html>
 <head>
     <title>RPG</title>
     <script src=https://code.jquery.com/jquery-3.6.0.min.js></script>
-    <link href="/css/my.css" rel="stylesheet">
+    <link href="/css/my.css" rel="stylesheet" type="text/css">
 </head>
 <body>
-<h1>RPG admin panel</h1>
+    <h1>RPG admin panel</h1>
+    <table id="playersTable">
+        <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Title</th>
+            <th>Race</th>
+            <th>Profession</th>
+            <th>Level</th>
+            <th>Birthday</th>
+            <th>Banned</th>
+        </tr>
+    </table>
+
+    <script>
+/*        $.ajax({
+            type: "GET",
+            url: "/rest/players",
+            success: function(data) {
+                let table = $('#playersTable');
+                $.each(data, function(index, player) {
+                    let row = $('<tr>');
+                    $.each(player, function(key, value) {
+                        row.append($('<td>').text(value));
+                    });
+                    table.append(row);
+                });
+            },
+        });*/
+        function getPlayers() {
+            fetch("/rest/players")
+                .then(response => response.json())
+                .then(data => {
+                    let table = document.getElementById("playersTable");
+                    data.forEach(player => {
+                        let row = table.insertRow();
+                        Object.values(player).forEach(value => {
+                            let cell = row.insertCell();
+                            cell.textContent = value;
+                        });
+                    });
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        getPlayers();
+    </script>
 
 </body>
 </html>

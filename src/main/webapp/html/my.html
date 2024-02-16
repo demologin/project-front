@@ -102,6 +102,9 @@
 
             $('#pages').append(btn);
         }
+        // Current page will be red
+        let pressedButton = "#pageButton" + pageNumber;
+        $(pressedButton).css('color', 'red')
     }
     // get request for total count of players
     function getCountOfAccounts() {

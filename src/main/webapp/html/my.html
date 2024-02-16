@@ -82,7 +82,12 @@
                     + player.profession + "</td><td>"
                     + player.level + "</td><td>"
                     + new Date(player.birthday).toLocaleDateString() + "</td><td>"
-                    + player.banned + "</td>"
+                    + player.banned + "</td><td>"
+                    + "<button id='editButton'" + player.id + ">"
+                    + "<img src='img/edit.png'>"
+                    + "</button>" + "</td><td>"
+                    + "<button id='deleteButton'" + player.id + ">"
+                    + "<img src='img/delete.png'>" + "</button>" + "</td>"
                 ).appendTo('#myTable1');
             });
         });

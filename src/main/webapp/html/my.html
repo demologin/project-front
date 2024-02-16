@@ -4,8 +4,119 @@
     <script src=https://code.jquery.com/jquery-3.6.0.min.js></script>
     <link href="/css/my.css" rel="stylesheet">
 </head>
-<body>
+<body onload="showTable(0)">
 <h1>RPG admin panel</h1>
+
+<!-- Table -->
+<h2>Accounts list:</h2>
+
+<!--Select Menu-->
+<label for="selectMenu" onchange="showTable(0)"> Count per page:
+    <select id="selectMenu">
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+        <option value="6">6</option>
+        <option value="7">7</option>
+        <option value="8">8</option>
+        <option value="9">9</option>
+        <option value="10">10</option>
+        <option value="11">11</option>
+        <option value="12">12</option>
+        <option value="13">13</option>
+        <option value="14">14</option>
+        <option value="15">15</option>
+        <option value="16">16</option>
+        <option value="17">17</option>
+        <option value="18">18</option>
+        <option value="19">19</option>
+        <option value="20">20</option>
+    </select>
+</label>
+
+<table class="myTable" id="myTable1">
+    <tr>
+        <th>#</th>
+        <th>Name</th>
+        <th>Title</th>
+        <th>Race</th>
+        <th>Profession</th>
+        <th>Level</th>
+        <th>Birthday</th>
+        <th>Banned</th>
+    </tr>
+</table>
+
+<div id="pages">
+    Pages:
+</div>
+
+<!--Js-->
+<script>
+    function showTable(pageNumber) {
+        // Remove table data before add table data
+        $('tr:has(td)').remove();
+
+        let url = "/rest/players?";
+        // Get selected value from menu
+        let countPerPages = $('#selectMenu').val()
+
+        if (countPerPages === undefined) {
+            countPerPages = 3;
+        }
+        if (pageNumber === undefined) {
+            pageNumber = 0;
+        }
+        // Concat url
+        url = url.concat('pageSize=').concat(countPerPages);
+        url = url.concat('&pageNumber=').concat(pageNumber);
+
+        // get request to bd
+        $.get(url, function (data) {
+            $.each(data, function (i, player) {
+                $('<tr>').html("<td>"
+                    + player.id + "</td><td>"
+                    + player.name + "</td><td>"
+                    + player.title + "</td><td>"
+                    + player.race + "</td><td>"
+                    + player.profession + "</td><td>"
+                    + player.level + "</td><td>"
+                    + new Date(player.birthday).toLocaleDateString() + "</td><td>"
+                    + player.banned + "</td>"
+                ).appendTo('#myTable1');
+            });
+        });
+        // Total count of players
+        let accountsCount = getCountOfAccounts()
+
+        let pagesCount = Math.ceil(accountsCount / countPerPages)
+
+        // Remove buttons before add buttons
+        $('button.pagingButtonClass').remove();
+        // Add buttons to html
+        for (let i = 0; i < pagesCount; i++) {
+            let btn = $('<button>' + (i + 1) + '</button>')
+                .attr('id', "pageButton" + i)
+                .attr('onclick', 'showTable(' + i + ')')
+                .addClass('pagingButtonClass');
+
+            $('#pages').append(btn);
+        }
+    }
+    // get request for total count of players
+    function getCountOfAccounts() {
+        let url = "/rest/players/count";
+        let countOfAccounts = 0;
+    // sync request to bd
+        $.ajax({
+            url: url, async: false, success: function (data) {
+                countOfAccounts = parseInt(data);
+            }
+        })
+        return countOfAccounts
+    }
+
+</script>
 
 </body>
 </html>

@@ -158,6 +158,62 @@
 
         $(deleteButton).remove();
         $(editButton).html('<img src="/img/save.png" alt="save">')
+
+        let currentTr = $(editButton).parent().parent();
+        let children = currentTr.children();
+        // for td name
+        let tdName = children[1];
+        tdName.innerHTML = "<input id='inputName" + id + "' type='text' value='" + tdName.innerHTML + "'>";
+        //for td title
+        let tdTitle = children[2];
+        tdTitle.innerHTML = "<input id='inputTitle" + id + "' type='text' value='" + tdTitle.innerHTML + "'>";
+        //------------------for td race-------------------------------------------------------------------------
+        let tdRace = children[3];
+        let raceId = "selectRace" + id;
+        let raceCurrentValue = tdRace.innerHTML;
+
+        tdRace.innerHTML = "<label for='race'></label>"
+            + "<select id=" + raceId + " name='race'>"
+            + "<option value='HUMAN'>HUMAN</option>"
+            + "<option value='DWARF'>DWARF</option>"
+            + "<option value='ELF'>ELF</option>"
+            + "<option value='GIANT'>GIANT</option>"
+            + "<option value='ORC'>ORC</option>"
+            + "<option value='TROLL'>TROLL</option>"
+            + "<option value='HOBBIT'>HOBBIT</option>"
+            + "</select>";
+
+        $('#' + raceId).val(raceCurrentValue).change();
+        //------------------for td banned-------------------------------------------------------------------------
+        let tdBanned = children[7];
+        let bannedId = "selectBanned" + id;
+        let bannedCurrentValue = tdBanned.innerHTML;
+
+        tdBanned.innerHTML = "<label for='banned'></label>"
+            + "<select id=" + bannedId + " name='banned'>"
+            + "<option value='true'>true</option>"
+            + "<option value='false'>false</option>"
+            + "</select>";
+
+        $('#' + bannedId).val(bannedCurrentValue).change();
+        //------------------for td profession-------------------------------------------------------------------------
+        let tdProfession = children[4];
+        let professionId = "selectProfession" + id;
+        let professionCurrentValue = tdProfession.innerHTML;
+
+        tdProfession.innerHTML = "<label for='profession'></label>"
+            + "<select id=" + professionId + " name='profession'>"
+            + "<option value='WARRIOR'>WARRIOR</option>"
+            + "<option value='ROGUE'>ROGUE</option>"
+            + "<option value='SORCERER'>SORCERER</option>"
+            + "<option value='CLERIC'>CLERIC</option>"
+            + "<option value='PALADIN'>PALADIN</option>"
+            + "<option value='NAZGUL'>NAZGUL</option>"
+            + "<option value='WARLOCK'>WARLOCK</option>"
+            + "<option value='DRUID'>DRUID</option>"
+            + "</select>";
+
+        $('#' + professionId).val(professionCurrentValue).change();
     }
 </script>
 

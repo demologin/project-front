@@ -86,7 +86,7 @@
                     + player.level + "</td><td>"
                     + new Date(player.birthday).toLocaleDateString() + "</td><td>"
                     + player.banned + "</td><td>"
-                    + "<button id='editButton" + player.id + "' onclick='editAccount("+ player.id + ")" + "'>"
+                    + "<button id='editButton" + player.id + "' onclick='editPlayer("+ player.id + ")" + "'>"
                     + "<img src='img/edit.png'>"
                     + "</button>" + "</td><td>"
                     + "<button id='deleteButton" + player.id + "' onclick='deletePlayer(" + player.id + ")" + "'>"
@@ -151,8 +151,8 @@
         });
         return parseInt(currentPage) - 1;
     }
-
-    function editAccount(id) {
+    // edit player function
+    function editPlayer(id) {
         let deleteButton = "#deleteButton" + id;
         let editButton = "#editButton" + id;
 
@@ -195,6 +195,7 @@
             + "<option value='false'>false</option>"
             + "</select>";
 
+
         $('#' + bannedId).val(bannedCurrentValue).change();
         //------------------for td profession-------------------------------------------------------------------------
         let tdProfession = children[4];
@@ -214,7 +215,40 @@
             + "</select>";
 
         $('#' + professionId).val(professionCurrentValue).change();
+
+        $(editButton).attr('onclick', "savePlayer(" + id + ")");
     }
+
+
+    //save player
+    function savePlayer(id) {
+        let name = $('#inputName' + id).val();
+        let title = $('#inputTitle' + id).val();
+        let race = $('#selectRace' + id).val();
+        let profession = $('#selectProfession' + id).val();
+        let banned = $('#selectBanned' + id).val();
+        let url = "/rest/players/" + id;
+        console.log(name + title + race + profession + banned + "")
+        $.ajax(
+            {
+                url: url,
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json;charset=UTF-8',
+                async: false,
+                data: JSON.stringify({
+                    "name": name,
+                    "title": title,
+                    "race": race,
+                    "profession": profession,
+                    "banned": banned,
+                }),
+                success: function () {
+                    showTable(getCurrentPage());
+                }
+            });
+    }
+
 </script>
 
 </body>

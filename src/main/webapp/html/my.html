@@ -44,6 +44,8 @@
         <th>Level</th>
         <th>Birthday</th>
         <th>Banned</th>
+        <th>Edit</th>
+        <th>Delete</th>
     </tr>
 </table>
 
@@ -84,7 +86,7 @@
                     + player.level + "</td><td>"
                     + new Date(player.birthday).toLocaleDateString() + "</td><td>"
                     + player.banned + "</td><td>"
-                    + "<button id='editButton" + player.id + "'>"
+                    + "<button id='editButton" + player.id + "' onclick='editAccount("+ player.id + ")" + "'>"
                     + "<img src='img/edit.png'>"
                     + "</button>" + "</td><td>"
                     + "<button id='deleteButton" + player.id + "' onclick='deletePlayer(" + player.id + ")" + "'>"
@@ -148,6 +150,14 @@
             }
         });
         return parseInt(currentPage) - 1;
+    }
+
+    function editAccount(id) {
+        let deleteButton = "#deleteButton" + id;
+        let editButton = "#editButton" + id;
+
+        $(deleteButton).remove();
+        $(editButton).html('<img src="/img/save.png" alt="save">')
     }
 </script>
 

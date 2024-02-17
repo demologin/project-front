@@ -53,6 +53,7 @@
 
 <!--Js-->
 <script>
+    //Load table
     function showTable(pageNumber) {
         // Remove table data before add table data
         $('tr:has(td)').remove();
@@ -83,10 +84,10 @@
                     + player.level + "</td><td>"
                     + new Date(player.birthday).toLocaleDateString() + "</td><td>"
                     + player.banned + "</td><td>"
-                    + "<button id='editButton'" + player.id + ">"
+                    + "<button id='editButton" + player.id + "'>"
                     + "<img src='img/edit.png'>"
                     + "</button>" + "</td><td>"
-                    + "<button id='deleteButton'" + player.id + ">"
+                    + "<button id='deleteButton" + player.id + "' onclick='deletePlayer(" + player.id + ")" + "'>"
                     + "<img src='img/delete.png'>" + "</button>" + "</td>"
                 ).appendTo('#myTable1');
             });
@@ -115,7 +116,7 @@
     function getCountOfAccounts() {
         let url = "/rest/players/count";
         let countOfAccounts = 0;
-    // sync request to bd
+        // sync request to bd
         $.ajax({
             url: url, async: false, success: function (data) {
                 countOfAccounts = parseInt(data);
@@ -123,7 +124,31 @@
         })
         return countOfAccounts
     }
+    // delete request
+    function deletePlayer(id) {
+        console.log(getCurrentPage());
+        let url = "/rest/players/" + id;
 
+        $.ajax(
+            {
+                url: url,
+                type: "DELETE",
+                success: function () {
+                    showTable(getCurrentPage());
+                }
+            })
+    }
+    //Get current page by css style (red color)
+    function getCurrentPage() {
+        let currentPage = 1;
+
+        $('button:parent(div)').each(function () {
+            if ($(this).css('color') === 'rgb(255, 0, 0)') {
+                currentPage = $(this).text();
+            }
+        });
+        return parseInt(currentPage) - 1;
+    }
 </script>
 
 </body>

@@ -1,0 +1,9 @@
+.myTable td, th {
+    border: 3px solid black;
+    background-color: antiquewhite;
+}
+.myTable {
+    background-color: antiquewhite;
+    border-collapse: collapse;
+    margin: 20px;
+}

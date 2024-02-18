@@ -95,7 +95,12 @@
     <option value="false">false</option>
     <option value="true">true</option>
 </select>
-
+<br>
+<span>
+<button type="submit" id="createButton" onclick="createPlayer()">
+    <img src="img/save.png" alt="save">
+</button>
+</span>
 <!--Js-->
 <script>
     //Load table
@@ -193,6 +198,46 @@
             }
         });
         return parseInt(currentPage) - 1;
+    }
+    // create player function
+    function createPlayer() {
+        let url = "/rest/players";
+        let newName = $('#newInputName').val()
+        let newTitle = $('#newInputTitle').val()
+        let newRace = $('#newSelectRace').val()
+        let newProfession = $('#newSelectProfession').val()
+        let newLevel = $('#newInputLevel').val()
+        let newBirthday = $('#newInputBirthday').val()
+        let newBanned = $('#newSelectBanned').val()
+
+        let currenPage = window.location.href;
+
+        $.ajax({
+            url: url,
+            type: "POST",
+            dataType: "json",
+            contentType: 'application/json;charset=UTF-8',
+            async: false,
+            data: JSON.stringify({
+                "name": newName,
+                "title": newTitle,
+                "race": newRace,
+                "profession": newProfession,
+                "level": newLevel,
+                "birthday": new Date(newBirthday).getTime(),
+                "banned": newBanned
+            }),
+            success: function () {
+                $('#newInputName').val("")
+                $('#newInputTitle').val("")
+                $('#newSelectRace').val("")
+                $('#newSelectProfession').val("")
+                $('#newInputLevel').val("")
+                $('#newInputBirthday').val("")
+                $('#newSelectBanned').val("")
+                showTable(0);
+            }
+        })
     }
     // edit player function
     function editPlayer(id) {

@@ -1,11 +1,135 @@
-<html>
+<html lang="en">
 <head>
     <title>RPG</title>
-    <script src=https://code.jquery.com/jquery-3.6.0.min.js></script>
-    <link href="/css/my.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="/css/my.css">
 </head>
 <body>
 <h1>RPG admin panel</h1>
 
+<div id="paging">
+    <label for="countPerPage">Count per page:</label>
+    <select id="countPerPage">
+        <option value="3">3</option>
+        <option value="5">5</option>
+        <option value="10">10</option>
+        <option value="20">20</option>
+    </select>
+
+</div>
+
+<table id="table">
+    <thead>
+    <tr>
+        <th>#</th>
+        <th>Name</th>
+        <th>Title</th>
+        <th>Race</th>
+        <th>Profession</th>
+        <th>Level</th>
+        <th>Birthday</th>
+        <th>Banned</th>
+        <th>Edit</th>
+        <th>Delete</th>
+    </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+<div id="paginationButtons"></div>
+
+<script>
+    $(document).ready(function () {
+        let totalElements = 0;
+        let currentPage = 0;
+        let totalPages = 0;
+
+        $("#countPerPage").on('change', function () {
+            currentPage = 0;
+            getTotalElements();
+        });
+
+        function getTotalElements() {
+            $.get('/rest/players/count', function (count) {
+                totalElements = count;
+                totalPages = Math.ceil(totalElements / $('#countPerPage').val());
+                generatePaginationButtons();
+                loadData();
+            });
+        }
+
+        function loadData() {
+            const countPerPage = $('#countPerPage').val();
+
+            $.get(`/rest/players?pageNumber=${currentPage}&pageSize=${countPerPage}`, function (data) {
+                let tableBody = $('#table tbody');
+                tableBody.empty();
+
+                $.each(data, function (index, item) {
+                    let newRow = $('<tr>');
+                    let date = new Date(item.birthday);
+
+                    let month = (date.getMonth() + 1).toString().padStart(2, '0');
+                    let day = date.getDate().toString().padStart(2, '0');
+                    let year = date.getFullYear().toString();
+                    let birthdate = `${month}/${day}/${year}`;
+
+                    var editImage = $('<img src="/img/edit.png">');
+                    var deleteImage = $('<img src="/img/delete.png">');
+
+
+                    deleteImage.click(function() {
+                        var playerId = item.id;
+                        $.ajax({
+                            type: 'DELETE',
+                            url: '/rest/players/' + playerId,
+                            success: function(response) {
+                                getTotalElements()
+                            },
+                            error: function(error) {
+                                alert('Error');
+                            }
+                        });
+                    });
+
+
+                    newRow.append('<td>' + item.id + '</td>');
+                    newRow.append('<td>' + item.name + '</td>');
+                    newRow.append('<td>' + item.title + '</td>');
+                    newRow.append('<td>' + item.race + '</td>');
+                    newRow.append('<td>' + item.profession + '</td>');
+                    newRow.append('<td>' + item.level + '</td>');
+                    newRow.append('<td>' + birthdate + '</td>');
+                    newRow.append('<td>' + item.banned + '</td>');
+                    newRow.append($('<td>').append(editImage));
+                    newRow.append($('<td>').append(deleteImage));
+
+                    tableBody.append(newRow);
+                });
+
+                generatePaginationButtons();
+            });
+        }
+
+        function generatePaginationButtons() {
+            let paginationDiv = $('#paginationButtons');
+            paginationDiv.empty();
+
+            for (let i = 1; i <= totalPages; i++) {
+                let button = $('<button>').text(i);
+                if (i - 1 === currentPage) {
+                    button.addClass('active');
+                }
+                button.on('click', function () {
+                    currentPage = i - 1;
+                    loadData();
+                });
+
+                paginationDiv.append(button);
+            }
+        }
+
+        getTotalElements();
+    });
+</script>
 </body>
 </html>

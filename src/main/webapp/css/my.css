@@ -1,0 +1,106 @@
+
+#fon_header {
+    text-align: left;
+    margin-top: -8px;
+    font-family: "Arial Black";
+    font-weight: bold;
+}
+
+#create_style {
+    font-family: "Arial Black";
+    font-weight: bold;
+    height: 10px;
+}
+
+#playerTable {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #ffffff;
+
+}
+
+#count_1{
+    margin-bottom: 5px;
+    font-size: 12px;
+    border: 3px solid #2a2a2a;
+    font-family: "Arial Black";
+    font-weight: bold;
+    width: 80px;
+}
+
+#count_style{
+    font-size: 16px;
+    font-family: "Arial Black";
+    width: auto;
+}
+
+#paging_buttons {
+    font-size: 16px;
+    font-family: "Arial Black";
+    font-weight: bold;
+}
+
+.pgn-bnt-styled {
+    margin: 10px 3px;
+    padding: 8px 4px;
+    font-size: 17px;
+    font-family: "Arial Black";
+    background-color: #696969;
+    border-radius: 5px;
+    border: 0px;
+    color: aliceblue;
+    min-width: 40px;
+}
+
+.pgn-bnt-styled:focus {
+    outline: none;
+    border: 0px;
+    color: aliceblue;
+}
+
+.btn_style{
+    font-size: 20px;
+    width: 80px;
+    padding: 6px 6px 8px 8px;
+    font-family: "Arial Black";
+    border: 0px;
+    color: white;
+    background-color: #696969;
+    border-radius: 5px;
+}
+
+.btn_style:active{
+    color: #34a9fa;
+}
+
+body {
+    background-color: #34a9fa;
+}
+th, td {
+    border: 3px solid #2a2a2a;
+    text-align: center;
+    padding: 10px;
+    font-weight: bold;
+    border-radius: 20px;
+}
+
+label {
+    display: inline-block;
+    width: 100px; /* Ширина метки */
+    text-align: right; /* Выравнивание текста метки по правому краю */
+    margin-right: 10px; /* Отступ между меткой и полем ввода */
+    margin-top: 20px;
+    font-size: 16px;
+    font-family: "Arial Black";
+}
+
+input[type="text"],
+input[type="number"],
+input[type="date"],
+select {
+    width: 210px; /* Ширина поля ввода */
+    padding: 5px; /* Отступы внутри поля ввода */
+    border-radius: 5px; /* Скругление углов поля ввода */
+    border: 1px solid #ccc; /* Граница поля ввода */
+}
+

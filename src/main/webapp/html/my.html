@@ -177,8 +177,9 @@
                         cell.append(dropdown);
                     } else if (index === 7) {
                         cell.empty();
-                        var values = ["true", "false"];
+                        var values = ["false", "true"];
                         var dropdown = createDropdown(values, item.banned);
+                        dropdown.val(text);
                         cell.append(dropdown);
                     } else if (index === 8) {
                         editImage.attr('src', '/img/save.png');

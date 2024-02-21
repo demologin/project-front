@@ -76,16 +76,105 @@
                     var editImage = $('<img src="/img/edit.png">');
                     var deleteImage = $('<img src="/img/delete.png">');
 
+                    editImage.click(function () {
+                        console.log("clicked 1st time");
+                        var currentRow = $(this).closest('tr');
+                        currentRow.find('td').each(function (index) {
+                            var cell = $(this);
+                            var text = cell.text();
 
-                    deleteImage.click(function() {
+                            if (index === 1 || index === 2) {
+                                cell.empty();
+                                var input = $('<input type="text">');
+                                input.val(text);
+                                cell.append(input);
+                            } else if (index === 3) {
+                                cell.empty();
+                                var races = ["HUMAN", "DWARF", "ELF", "GIANT", "ORC", "TROLL", "HOBBIT"];
+                                var dropdown = document.createElement("select");
+
+                                for (var i = 0; i < races.length; i++) {
+                                    var option = document.createElement("option");
+                                    option.text = races[i];
+                                    dropdown.add(option);
+                                }
+
+                                cell.append(dropdown);
+                            } else if (index === 4) {
+                                cell.empty();
+                                var professions = ["WARRIOR", "ROGUE", "SORCERER", "CLERIC",
+                                    "PALADIN", "NAZGUL", "WARLOCK", "DRUID"];
+                                var dropdown = document.createElement("select");
+
+                                for (var i = 0; i < professions.length; i++) {
+                                    var option = document.createElement("option");
+                                    option.text = professions[i];
+                                    dropdown.add(option);
+                                }
+
+                                cell.append(dropdown);
+                            } else if (index === 7) {
+                                cell.empty();
+                                var values = ["true", "false"];
+                                var dropdown = document.createElement("select");
+
+                                for (var i = 0; i < values.length; i++) {
+                                    var option = document.createElement("option");
+                                    option.text = values[i];
+                                    dropdown.add(option);
+                                }
+
+                                cell.append(dropdown);
+                            } else if (index === 8) {
+                                editImage.attr('src', '/img/save.png');
+                            } else if (index === 9) {
+                                cell.empty();
+                            }
+
+                            editImage.off("click").click(function () {
+
+                                var currentRow = $(this).closest('tr');
+
+                                var name = currentRow.find('td:eq(1) input').val();
+                                var title = currentRow.find('td:eq(2) input').val();
+                                var race = currentRow.find('td:eq(3) select').val();
+                                var profession = currentRow.find('td:eq(4) select').val();
+                                var banned = currentRow.find('td:eq(7) select').val();
+                                var requestData = {
+                                    "name": name,
+                                    "title": title,
+                                    "race": race,
+                                    "profession": profession,
+                                    "banned": banned,
+                                };
+
+                                $.ajax({
+                                    type: "POST",
+                                    url: "/rest/players/" + item.id,
+                                    contentType: "application/json",
+                                    data: JSON.stringify(requestData),
+                                    success: function (response) {
+                                        getTotalElements();
+                                    },
+                                    error: function (error) {
+                                        alert(error.message);
+                                    }
+                                });
+
+                            })
+
+                        })
+                    })
+
+                    deleteImage.click(function () {
                         var playerId = item.id;
                         $.ajax({
                             type: 'DELETE',
                             url: '/rest/players/' + playerId,
-                            success: function(response) {
+                            success: function (response) {
                                 getTotalElements()
                             },
-                            error: function(error) {
+                            error: function (error) {
                                 alert('Error');
                             }
                         });

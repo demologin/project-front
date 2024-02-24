@@ -2,11 +2,22 @@
 <html>
 <head>
     <title>RPG</title>
-    <script src=https://code.jquery.com/jquery-3.6.0.min.js></script>
     <link href="/css/my.css" rel="stylesheet" type="text/css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
-<body>
+<body onload="showPage(0)">
     <h1>RPG admin panel</h1>
+    <hr>
+    <h2>Accounts list:</h2>
+
+    <label for="pageSizeSelect">Players per page:</label>
+        <select id="pageSizeSelect" onchange="showPage()">
+            <option value="3">3</option>
+            <option value="5">5</option>
+            <option value="12">12</option>
+            <option value="18">18</option>
+        </select><br>
+
     <table id="playersTable">
         <tr>
             <th>#</th>
@@ -17,42 +28,327 @@
             <th>Level</th>
             <th>Birthday</th>
             <th>Banned</th>
+            <th>Edit</th>
+            <th>Delete</th>
         </tr>
     </table>
+    <div id="pagingButtons">Pages:</div>
+    <hr>
+
+    <div class="createNewAccount">
+        <p><u>Create a new account:</u></p>
+        <label for="nameInput">Name:</label>
+        <input type="text" id="nameInput" size="12" maxLength="12" required><br>
+
+        <label for="titleInput">Title:</label>
+        <input type="text" id="titleInput" size="30" maxlength="30" required><br>
+
+        <label for="raceSelect">Race:</label>
+            <select id="raceSelect"></select><br>
+
+        <label for="professionSelect">Profession:</label>
+            <select id="professionSelect"></select><br>
+
+        <label for="levelInput">Level:</label>
+        <input type="number" id="levelInput" min="0" max="100" required><br>
+
+        <label for="birthdayInput">Birthday:</label>
+        <input type="date" id="birthdayInput" min="2000-01-01" max="3000-12-31"><br>
+
+        <label for="bannedSelect">Banned:</label>
+            <select id="bannedSelect"></select><br>
+
+        <span>
+            <button id="createAccountButton">Create Account</button>
+        </span>
+    </div>
 
     <script>
-/*        $.ajax({
-            type: "GET",
-            url: "/rest/players",
-            success: function(data) {
-                let table = $('#playersTable');
-                $.each(data, function(index, player) {
-                    let row = $('<tr>');
-                    $.each(player, function(key, value) {
-                        row.append($('<td>').text(value));
-                    });
-                    table.append(row);
+        $(document).ready(function() {
+
+            newAccountFieldsIni();
+
+            // обрабочик клика Create Account
+            $("#createAccountButton").on("click", function () {
+                let newAccount = {
+                    name: $("#nameInput").val(),
+                    title: $("#titleInput").val(),
+                    race: $("#raceSelect").val(),
+                    profession: $("#professionSelect").val(),
+                    level: $("#levelInput").val(),
+                    birthday: new Date($("#birthdayInput").val()).getTime(),
+                    banned: $("#bannedSelect").val()
+                };
+                console.log(newAccount);
+
+                $.ajax({
+                    url: "/rest/players",
+                    type: "POST",
+                    dataType: "json",
+                    contentType: "application/json;charset=UTF-8",
+                    async: false,
+                    data: JSON.stringify(newAccount),
+                    success: function (response) {
+                        console.log("New account created successfully");
+                        showPage(getCurrentPageNumber());
+                    },
+                    error: function (xhr, status, error) {
+                        console.log("Error creating account", error);
+                    }
                 });
-            },
-        });*/
-        function getPlayers() {
-            fetch("/rest/players")
-                .then(response => response.json())
-                .then(data => {
-                    let table = document.getElementById("playersTable");
-                    data.forEach(player => {
-                        let row = table.insertRow();
-                        Object.values(player).forEach(value => {
-                            let cell = row.insertCell();
-                            cell.textContent = value;
-                        });
+            });
+
+            // обработчик клика Delete
+            $("#playersTable").on("click", ".deleteIcon", function() {
+                let accountId = $(this).closest("tr").find("td:first").text();
+                deleteAccount(accountId);
+            });
+
+            // обработчик клика Edit
+            $("#playersTable").on("click", ".editIcon", function() {
+                let currentRow = $(this).closest("tr"); // родительская строка (tr) для кнопки Edit
+                let deleteButton = currentRow.find(".deleteIcon");
+                let editButton = currentRow.find(".editIcon");
+
+                // прячем Delete, меняем кнопку Edit на Save
+                deleteButton.hide();
+                editButton.attr("src", "/img/save.png").attr("alt", "Save");
+
+                // поля для редактирования
+                let nameField = currentRow.find("td:eq(1)");
+                let titleField = currentRow.find("td:eq(2)");
+                let raceField = currentRow.find("td:eq(3)");
+                let professionField = currentRow.find("td:eq(4)");
+                let bannedField = currentRow.find("td:eq(7)");
+
+                let currentName = nameField.text().trim();
+                let currentTitle = titleField.text().trim();
+                let currentRace = raceField.text().trim();
+                let currentProfession = professionField.text().trim();
+                let currentBanned = bannedField.text().trim();
+
+                /**
+                 * Создаем и вставляем HTML-элементы  <input>  в соответствующие поля для
+                 * редактирования (nameField, titleField, etc.)
+                 */
+                nameField.html(`<input type="text" value="${currentName}">`);
+                titleField.html(`<input type="text" value="${currentTitle}">`);
+
+                // выпадающий список Race
+                let raceDropdown = createRaceDropdown(currentRace);
+                raceField.html(raceDropdown);
+
+                // выпадающий список Profession
+                let professionDropdown = createProfessionDropdown(currentProfession);
+                professionField.html(professionDropdown);
+
+                // выпадающий список Banned
+                let bannedDropdown = createBannedDropdown(currentBanned);
+                bannedField.html(bannedDropdown);
+
+                // обработчик клика Save
+                editButton.off("click").on("click", function() {
+                    // логика сохранения изменений аккаунта
+                    saveUpdatedData(currentRow);
+
+                    // возвращаем Delete и Edit
+                    deleteButton.show();
+                    editButton.attr("src", "/img/edit.png").attr("alt", "Edit");
+
+                    // возвращаем поля в неактивное состояние
+                    nameField.html(currentName);
+                    titleField.html(currentTitle);
+                    raceField.html(currentRace);
+                    professionField.html(currentProfession);
+                    bannedField.html(currentBanned);
+
+                    // убираем обработчик клика на кнопку Save
+                    editButton.off("click");
+
+                    return false;
+                });
+            });
+
+            // инициализация полей для нового аккаунта:
+            function newAccountFieldsIni() {
+                let raceSelect = $("#raceSelect");
+                raceSelect.html(createRaceDropdown("HUMAN"));
+
+                let professionSelect = $("#professionSelect");
+                professionSelect.html(createProfessionDropdown("ROGUE"));
+
+                $("#birthdayInput").val(new Date().toISOString().split('T')[0]);
+
+                let bannedSelect = $("#bannedSelect");
+                bannedSelect.html(createBannedDropdown("false"));
+            }
+
+            function createDropdown(options, currentValue) {
+                let dropdown = "<select>";
+                options.forEach(option => {
+                    dropdown += `<option value="${option}" ${currentValue === option ? "selected" : ""}>${option}</option>`;
+                });
+                dropdown += "</select>";
+                return dropdown;
+            }
+
+            // выпадающий список для поля Race
+            function createRaceDropdown(currentRace) {
+                let raceOptions = ["HUMAN", "DWARF", "ORC", "ELF", "GIANT", "TROLL", "HOBBIT"];
+                return createDropdown(raceOptions, currentRace);
+            }
+
+            // выпадающий список Profession
+            function createProfessionDropdown(currentProfession) {
+                let professionOptions = ["ROGUE", "WARRIOR", "CLERIC", "SORCERER", "PALADIN", "DRUID", "NAZGUL", "WARLOCK"];
+                return createDropdown(professionOptions, currentProfession);
+            }
+
+            // выпадающий список Banned
+            function createBannedDropdown(currentBanned) {
+                let bannedOptions = ["true", "false"];
+                return createDropdown(bannedOptions, currentBanned);
+            }
+
+            function saveUpdatedData(currentRow) {
+                let accountID = currentRow.find("td:first").text();
+                let updatedName = currentRow.find("input[type='text']:eq(0)").val();
+                let updatedTitle = currentRow.find("input[type='text']:eq(1)").val();
+                let updatedRace = currentRow.find("select:eq(0)").val();
+                let updatedProfession = currentRow.find("select:eq(1)").val();
+                let updatedBanned = currentRow.find("select:eq(2)").val();
+
+                let updatedData = {
+                    name: updatedName,
+                    title: updatedTitle,
+                    race: updatedRace,
+                    profession: updatedProfession,
+                    banned: updatedBanned
+                };
+
+                $.ajax({
+                    url: "/rest/players/" + accountID,
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify(updatedData),
+                    success: function (response) {
+                        console.log("Account updated successfully");
+                        showPage(getCurrentPageNumber());
+                    },
+                    error: function (xhr, status, error) {
+                        console.log("Error updating account:", error);
+                    }
+                });
+            }
+        });
+
+        function showPage(pageNumber) {
+            $("#playersTable").empty();
+            $("tr:has(td)").remove();
+
+            let pageSize = $("#pageSizeSelect").val();
+            if (pageSize == null) {
+                pageSize = 3;
+            }
+
+            if (pageNumber == null) {
+                pageNumber = 0;
+            }
+
+            $.get("/rest/players?pageSize=" + pageSize + "&pageNumber=" + pageNumber,
+                function (data) {
+
+                    $("#playersTable").empty();
+
+                    // заголовки таблицы
+                    let headers = ["#", "Name", "Title", "Race", "Profession", "Level", "Birthday", "Banned", "Edit", "Delete"];
+                    let headerRow = $("<tr>");
+                    headers.forEach(headerText => {
+                        headerRow.append($("<th>").text(headerText));
                     });
-                })
-                .catch(error => console.error('Error:', error));
+                    $("#playersTable").append(headerRow);
+
+                $.each(data, function (index, player) {
+                    let row = $("<tr>");
+                    row.append($("<td>").text(player.id));
+                    row.append($("<td>").text(player.name));
+                    row.append($("<td>").text(player.title));
+                    row.append($("<td>").text(player.race));
+                    row.append($("<td>").text(player.profession));
+                    row.append($("<td>").text(player.level));
+                    row.append($("<td>").text(new Date(player.birthday).toLocaleDateString()));
+                    row.append($("<td>").text(player.banned));
+                    let editIcon = $("<img>").attr("src", "/img/edit.png").attr("alt", "Edit").addClass("editIcon");
+                    let deleteIcon = $("<img>").attr("src", "/img/delete.png").attr("alt", "Delete").addClass("deleteIcon");
+                    row.append($("<td>").append(editIcon));
+                    row.append($("<td>").append(deleteIcon));
+                    $("#playersTable").append(row);
+                });
+            });
+
+            let playersCount = getPlayersCount();
+            let pagesCount = Math.ceil(playersCount / pageSize);
+
+            // удаляем существующие кнопки страниц
+            $("button.pagingButtonStyled").remove();
+
+            // создаем новые кнопки страниц в соответствии с обновленным количеством страниц
+            for (let i = 0; i < pagesCount; i++) {
+                let buttonTag = "<button>" + (i + 1) + "</button>";
+                let pageButton = $(buttonTag)
+                    .attr("id", "pagingButton" + i)
+                    .attr("onclick", "showPage(" + i + ")")
+                    .addClass("pagingButtonStyled");
+                if (i === pageNumber) {
+                    pageButton.addClass("currentPageButton"); // добавляем класс для текущей страницы
+                }
+                $("#pagingButtons").append(pageButton);
+            }
         }
 
-        getPlayers();
-    </script>
+        function getPlayersCount() {
+            let playersCount = 0;
+            $.ajax({
+                url: "/rest/players/count",
+                type: "GET",
+                async: false,
+                success: function (count) {
+                    playersCount = parseInt(count);
+                },
+                error: function (xhr, status, error) {
+                    console.error("Request failed with status:", status, error);
+                }
+            });
 
+            return playersCount;
+        }
+
+        function deleteAccount(id) {
+            $.ajax({
+                url: "/rest/players/" + id,
+                type: "DELETE",
+                success: function (response) {
+                    console.log("Account deleted successfully");
+                    // обновляем список аккаунтов на текущей странице после удаления
+                    showPage(getCurrentPageNumber());
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error deleting account:", error);
+                }
+            });
+        }
+
+        function getCurrentPageNumber() {
+            let currentPage = 0;
+            $("button.pagingButtonStyled").each(function () {
+                if ($(this).css("color") === "rgb(255, 0, 0)") {
+                    currentPage = parseInt($(this).text()) - 1;
+                }
+            });
+
+            return currentPage;
+        }
+
+    </script>
 </body>
 </html>

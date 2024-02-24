@@ -36,7 +36,7 @@
 <hr>
 <h3>Create new account: </h3>
 <label for="inputNewName">Name:</label>
-<input type="text" id="inputNewName" name="name" required size="12" maxlength="12">
+<input type="text" id="inputNewName" name="name" required size="12" maxlength="12" >
 <br>
 
 <label for="inputNewTitle">Title:</label>
@@ -67,12 +67,12 @@
 </select>
 <br>
 
-<label for="inputNewLevel">Level:</label>
-<input type="number" id="inputNewLevel" name="level" min="0" max="100">
+<label for="inputNewLevel">Level: </label>
+<input type="number" id="inputNewLevel" required name="level" min="0" max="100">
 <br>
 
 <label for="inputNewBirthday">Birthday:</label>
-<input type="date" id="inputNewBirthday" name="birthday" min="2000-01-01" max="3000-12-31">
+<input type="date" id="inputNewBirthday" required name="birthday" min="2000-01-01" max="3000-12-31">
 <br>
 
 <label for="selectNewBanned">Banned:</label>
@@ -247,6 +247,10 @@
                 showAccountsList(getCurrentPage(""));
             }
         });
+
+        if (!nameValue || !titleValue || !raceValue || !professionValue || !levelValue || !birthdayValue) {
+            alert('All fields are required');
+        }
     }
 
     function saveAcc(id) {

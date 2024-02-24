@@ -1,0 +1,127 @@
+/* Общие стили для всего документа */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+}
+
+/* Стили для заголовков */
+h1 {
+    color: darkgreen;
+    font-size: 24px;
+}
+
+h2 {
+    color: black;
+    font-size: 20px;
+}
+
+select {
+    width: 150px;
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+    color: #333;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    background-color: white;
+}
+
+th {
+    border: 1px solid black;
+    padding: 8px;
+    text-align: center;
+    background-color: #b7d9ee;
+}
+
+td {
+    border: 1px solid black;
+    padding: 8px;
+    text-align: left;
+}
+
+.createNewAccount {
+    margin: 20px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 4px; /* Rounded corners */
+}
+
+.createNewAccount p {
+    font-weight: bold;
+    color: #333; /* Dark grey text */
+}
+
+.createNewAccount label {
+    display: block; /* Make labels block elements */
+    margin-top: 10px; /* Add space above labels */
+    color: #555; /* Medium grey text */
+}
+
+.createNewAccount input[type="text"],
+.createNewAccount input[type="number"],
+.createNewAccount input[type="date"],
+.createNewAccount select {
+    width: 100%; /* Full width */
+    padding: 8px; /* Padding inside the fields */
+    margin-top: 5px; /* Add space above the fields */
+    margin-bottom: 5px; /* Add space below the fields */
+    border: 1px solid #ccc; /* Light grey border */
+    border-radius: 4px; /* Rounded corners */
+}
+
+.createNewAccount button {
+    background-color: #5cb85c; /* Green background */
+    color: white; /* White text */
+    padding: 10px 20px; /* Padding inside the button */
+    border: none; /* No border */
+    border-radius: 4px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor on hover */
+    font-size: 16px; /* Larger font size */
+}
+
+.createNewAccount button:hover {
+    background-color: #4cae4c; /* Darker green background on hover */
+}
+
+
+#pagingButtons {
+    text-align: center; /* Выравнивание содержимого по центру */
+    margin: 20px 0; /* Отступ сверху и снизу */
+    padding: 10px 0; /* Внутренний отступ сверху и снизу */
+    background-color: #f2f2f2; /* Цвет фона */
+    border: 1px solid #dcdcdc; /* Цвет границы */
+    border-radius: 5px; /* Скругление углов */
+    color: #333; /* Цвет текста */
+    font-size: 16px; /* Размер шрифта */
+}
+
+.pagingButtonStyled {
+    background-color: #dddddd;
+    color: dimgrey; /* text */
+    padding: 12px 18px; /* Padding inside the button */
+    border: none; /* No border */
+    border-radius: 4px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor on hover */
+    font-size: 14px; /* Larger font size */
+}
+
+.pagingButtonStyled:hover {
+    background-color: #ccc;
+    color: #fff;
+}
+
+.currentPageButton {
+    background-color: cadetblue;
+    color: white;
+}
+
+.currentPageButton:hover {
+    background-color: #48787b;
+    color: whitesmoke;
+}

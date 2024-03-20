@@ -31,6 +31,8 @@
 
 <script>
     function show_list() {
+        $("tr:has(td)").remove();
+
         let url = "/rest/players";
         $.get(url, function (response) {
             $.each(response, function (i, item) {
@@ -55,6 +57,8 @@
         }
 
         let pagesCount = Math.ceil(totalCount / countPerPage);
+
+        $("button.pgn-bnt-styled").remove();
 
         for (let i = 0; i < pagesCount; i++) {
             let button_tag = "<button>" + (i + 1) + "</button>";

@@ -7,6 +7,14 @@
 <body onload="show_list()">
 <h1>RPG admin panel</h1>
 
+<label for="count_1"></label>
+<select id="count_1" onchange="show_list()">
+    <option value="3">3</option>
+    <option value="3">5</option>
+    <option value="3">10</option>
+    <option value="3">20</option>
+</select>
+
 <table id="table_1">
     <tr>
         <th>#</th>
@@ -17,8 +25,9 @@
         <th>Level</th>
         <th>Birthday</th>
         <th>Banned</th>
-    </tr>
 </table>
+
+<div id="paging_buttons">Pages:</div>
 
 <script>
     function show_list() {
@@ -37,6 +46,20 @@
                 ).appendTo("#table_1")
             });
         });
+        let totalCount = getTotalCount();
+    }
+
+    function getTotalCount() {
+        let url = "/rest/players/count";
+        let res = 0;
+        $.ajax({
+            url: url,
+            async: false,
+            success: function (result) {
+                res = parseInt(result);
+            }
+        })
+        return res;
     }
 </script>
 

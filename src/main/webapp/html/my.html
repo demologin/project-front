@@ -25,6 +25,8 @@
         <th>Level</th>
         <th>Birthday</th>
         <th>Banned</th>
+        <th>Edit</th>
+        <th>Delete</th>
 </table>
 
 <div id="paging_buttons">Pages:</div>
@@ -57,7 +59,13 @@
                     + item.profession + "</td><td>"
                     + item.level + "</td><td>"
                     + new Date(item.birthday).toLocaleDateString() + "</td><td>"
-                    + item.banned + "</td>"
+                    + item.banned + "</td><td>"
+                    + "<button id='button_edit_" + item.id + "'>"
+                    + "<img src='/img/edit.png'"
+                    + "</button>" + "</td><td>"
+                    + "<button id='button_delete_" + item.id + "'>"
+                    + "<img src='/img/delete.png'"
+                    + "</button>" + "</td>"
                 ).appendTo("#table_1")
             });
         });
@@ -77,6 +85,9 @@
                 .addClass('pgn-bnt-styled');
             $('#paging_buttons').append(btn);
         }
+
+        let identifier = "#paging_button_" + page_number;
+        $(identifier).css('color', "green");
     }
 
     function getTotalCount() {
@@ -91,6 +102,7 @@
         })
         return res;
     }
+
 </script>
 
 </body>

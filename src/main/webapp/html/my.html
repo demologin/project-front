@@ -123,6 +123,11 @@
         let save_image_tag = "<img src='/img/save.png'>";
         $(identifier_edit).html(save_image_tag);
 
+        let current_tr_element = $(identifier_edit).parent().parent();
+        let children = current_tr_element.children();
+
+        let td_name = children[1];
+        td_name.innerHTML = "<input id='input_name_" + id + "' type='text' value='" + td_name.innerHTML + " '>";
     }
 
     function getCurrentPage() {

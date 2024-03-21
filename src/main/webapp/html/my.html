@@ -131,7 +131,28 @@
 
         let td_title = children[2];
         td_title.innerHTML = "<input id='input_title_" + id + "' type='text' value='" + td_title.innerHTML + " '>";
+
+        let td_race = children[3];
+        let race_id = "#select_race_" + id;
+        let race_current_value = td_race.innerHTML;
+        td_race.innerHTML = getDropdownRaceHtml(id);
+        $(race_id).val(race_current_value).change();
     }
+
+    function getDropdownRaceHtml(id) {
+        let race_id = "select_race_" + id;
+        return "<label for='race'></label>"
+            + "<select id=" + race_id + " name='race'>"
+            + "<option value='HUMAN'>HUMAN</option>"
+            + "<option value='DWARF'>DWARF</option>"
+            + "<option value='ELF'>ELF</option>"
+            + "<option value='GIANT'>GIANT</option>"
+            + "<option value='ORC'>ORC</option>"
+            + "<option value='TROLL'>TROLL</option>"
+            + "<option value='HOBBIT'>HOBBIT</option>"
+            + "</select>";
+    }
+
 
     function getCurrentPage() {
         let current_page = 1;

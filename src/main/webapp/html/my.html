@@ -3,6 +3,12 @@
     <title>RPG</title>
     <script src=https://code.jquery.com/jquery-3.6.0.min.js></script>
     <link href="/css/my.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #E6E6FA;
+        }
+    </style>
+
 </head>
 <body onload="show_list(0)">
 <h1>RPG admin panel</h1>
@@ -15,7 +21,7 @@
     <option value="20">20</option>
 </select>
 
-<table id="table_1">
+<table id="table_1" bgcolor="#F5F5F5">
     <tr>
         <th>#</th>
         <th>Name</th>
@@ -34,7 +40,7 @@
 <hr>
 <h2>Create new account:</h2>
 <label for="input_name_new">Name:</label>
-<input type="text" id="input_name_new" name="name" required size="12" maxlength="12">
+<input type="text" id="input_name_new" name="name" required size="12" maxlength="12" >
 <br>
 
 <label for="input_title_new">Title:</label>
@@ -79,7 +85,11 @@
     <option value='false'>false</option>
     <option value='true'>true</option>
 </select>
-<br>
+<br><br>
+
+<span>
+    <button type="submit" onclick="createAcc()">Save</button>
+</span>
 
 <script>
     function show_list(page_number) {
@@ -203,6 +213,46 @@
         let property_save_tag = "saveAcc(" + id + ")";
         $(identifier_edit).attr('onclick', property_save_tag);
     }
+
+    function createAcc() {
+        let value_name = $("#input_name_new").val();
+        let value_title = $("#input_title_new").val();
+        let value_race = $("#input_race_new").val();
+        let value_profession = $("#input_profession_new").val();
+        let value_level = $("#input_level_new").val();
+        let value_birthday = $("#input_birthday_new").val();
+        let value_banned = $("#input_banned_new").val();
+
+
+        let url = "/rest/players";
+        $.ajax({
+            url: url,
+            type: 'POST',
+            dataType: 'json',
+            contentType: 'application/json;charset=UTF-8',
+            async: false,
+            data: JSON.stringify({
+                "name": value_name,
+                "title": value_title,
+                "race": value_race,
+                "profession": value_profession,
+                "banned": value_banned,
+                "level": value_level,
+                "birthday": new Date(value_birthday).getTime()
+            }),
+            success: function () {
+                $("#input_name_new").val("");
+                $("#input_title_new").val("");
+                $("#select_race_new").val("");
+                $("#select_profession_new").val("");
+                $("#select_level_new").val("");
+                $("#select_birthday_new").val("");
+                $("#select_banned_new").val("");
+                show_list(getCurrentPage(""));
+            }
+        });
+    }
+
 
     function saveAcc(id) {
         let value_name = $("#input_name_" + id).val();

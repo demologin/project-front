@@ -1,0 +1,80 @@
+#table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-top: 10px;
+}
+
+#table th {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+#table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+#table tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+#countPerPage {
+    min-width: 50px;
+}
+
+#paginationButtons {
+    margin-top: 10px;
+}
+
+#paginationButtons button {
+    background-color: #727273;
+    color: white;
+    border: 1px solid #ddd;
+    padding: 8px 16px;
+    margin-right: 3px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+#paginationButtons button:hover {
+    background-color: #464746;
+}
+
+#paginationButtons button.active {
+    background-color: #40cf46;
+}
+
+#createPlayerForm {
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-top: 20px;
+}
+
+#createPlayerForm label {
+    margin-right: 10px;
+}
+
+#createPlayerForm input,
+#createPlayerForm select {
+    margin-bottom: 10px;
+}
+
+#createPlayerButton {
+    background-color: #3b5ca8;
+    color: white;
+    border: none;
+    padding: 10px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+#createPlayerButton:hover {
+    background-color: #22418a;
+}

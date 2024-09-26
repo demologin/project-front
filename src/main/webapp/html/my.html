@@ -1,11 +1,319 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <title>RPG</title>
-    <script src=https://code.jquery.com/jquery-3.6.0.min.js></script>
-    <link href="/css/my.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="/css/my.css">
 </head>
 <body>
 <h1>RPG admin panel</h1>
 
+<div id="paging">
+    <label for="countPerPage">Count per page:</label>
+    <select id="countPerPage">
+        <option value="3">3</option>
+        <option value="5">5</option>
+        <option value="10">10</option>
+        <option value="20">20</option>
+    </select>
+</div>
+
+<table id="table">
+    <thead>
+    <tr>
+        <th>#</th>
+        <th>Name</th>
+        <th>Title</th>
+        <th>Race</th>
+        <th>Profession</th>
+        <th>Level</th>
+        <th>Birthday</th>
+        <th>Banned</th>
+        <th>Edit</th>
+        <th>Delete</th>
+    </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+<!-- Форма для создания нового игрока внизу таблицы -->
+<div id="paginationButtons"></div>
+
+<div id="createPlayerForm">
+    <h2>Create New Player</h2>
+    <p></p><label for="newPlayerName">Name:</label>
+    <input type="text" id="newPlayerName" required>
+
+
+    <p></p><label for="newPlayerTitle">Title:</label>
+    <input type="text" id="newPlayerTitle" required>
+
+    <p></p><label for="newPlayerRace">Race:</label>
+    <select id="newPlayerRace" required>
+        <option value="HUMAN">HUMAN</option>
+        <option value="DWARF">DWARF</option>
+        <option value="ELF">ELF</option>
+        <option value="GIANT">GIANT</option>
+        <option value="ORC">ORC</option>
+        <option value="TROLL">TROLL</option>
+        <option value="HOBBIT">HOBBIT</option>
+    </select>
+
+    <p></p><label for="newPlayerProfession">Profession:</label>
+    <select id="newPlayerProfession" required>
+        <option value="WARRIOR">WARRIOR</option>
+        <option value="ROGUE">ROGUE</option>
+        <option value="SORCERER">SORCERER</option>
+        <option value="CLERIC">CLERIC</option>
+        <option value="PALADIN">PALADIN</option>
+        <option value="NAZGUL">NAZGUL</option>
+        <option value="WARLOCK">WARLOCK</option>
+        <option value="DRUID">DRUID</option>
+    </select>
+
+    <p></p><label for="newPlayerLevel">Level:</label>
+    <input type="number" id="newPlayerLevel" min="0" max="100" required>
+
+    <p></p><label for="newPlayerBirthday">Birthday:</label>
+    <input type="date" id="newPlayerBirthday" required>
+
+    <p></p><label for="newPlayerBanned">Banned:</label>
+    <select id="newPlayerBanned" required>
+        <option value="false">false</option>
+        <option value="true">true</option>
+    </select>
+
+    <p></p>
+    <button id="createPlayerButton">Create Player</button>
+</div>
+
+<script>
+    $(document).ready(function () {
+        let totalElements = 0;
+        let currentPage = 0;
+        let totalPages = 0;
+
+        $("#countPerPage").on('change', function () {
+            currentPage = 0;
+            getTotalElements();
+        });
+
+        function getTotalElements() {
+            $.get('/rest/players/count', function (count) {
+                totalElements = count;
+                totalPages = Math.ceil(totalElements / $('#countPerPage').val());
+                generatePaginationButtons();
+                loadData();
+            });
+        }
+
+        function loadData() {
+            const countPerPage = $('#countPerPage').val();
+
+            $.get(`/rest/players?pageNumber=${currentPage}&pageSize=${countPerPage}`, function (data) {
+                let tableBody = $('#table tbody');
+                tableBody.empty();
+
+                $.each(data, function (index, item) {
+                    // Используем функцию createPlayerRow для создания новой строки для каждого игрока
+                    let newRow = createPlayerRow(item);
+                    tableBody.append(newRow);
+                });
+
+                generatePaginationButtons();
+            });
+        }
+
+        function generatePaginationButtons() {
+            let paginationDiv = $('#paginationButtons');
+            paginationDiv.empty();
+
+            for (let i = 1; i <= totalPages; i++) {
+                let button = $('<button>').text(i);
+                if (i - 1 === currentPage) {
+                    button.addClass('active');
+                }
+                button.on('click', function () {
+                    currentPage = i - 1;
+                    loadData();
+                });
+
+                paginationDiv.append(button);
+            }
+        }
+
+        function createPlayerRow(item) {
+            let newRow = $('<tr>');
+            let date = new Date(item.birthday);
+            let month = (date.getMonth() + 1).toString().padStart(2, '0');
+            let day = date.getDate().toString().padStart(2, '0');
+            let year = date.getFullYear().toString();
+            let birthdate = `${month}/${day}/${year}`;
+
+            var editImage = $('<img src="/img/edit.png">');
+            var deleteImage = $('<img src="/img/delete.png">');
+
+            editImage.click(function () {
+                var currentRow = $(this).closest('tr');
+                currentRow.find('td').each(function (index) {
+                    var cell = $(this);
+                    var text = cell.text();
+
+                    if (index === 1 || index === 2) {
+                        cell.empty();
+                        var input = $('<input type="text">');
+                        input.val(text);
+                        cell.append(input);
+                    } else if (index === 3) {
+                        cell.empty();
+                        var races = ["HUMAN", "DWARF", "ELF", "GIANT", "ORC", "TROLL", "HOBBIT"];
+                        var dropdown = createDropdown(races, item.race);
+                        cell.append(dropdown);
+                    } else if (index === 4) {
+                        cell.empty();
+                        var professions = ["WARRIOR", "ROGUE", "SORCERER", "CLERIC",
+                            "PALADIN", "NAZGUL", "WARLOCK", "DRUID"];
+                        var dropdown = createDropdown(professions, item.profession);
+                        cell.append(dropdown);
+                    } else if (index === 7) {
+                        cell.empty();
+                        var values = ["false", "true"];
+                        var dropdown = createDropdown(values, item.banned);
+                        dropdown.val(text);
+                        cell.append(dropdown);
+                    } else if (index === 8) {
+                        editImage.attr('src', '/img/save.png');
+                    } else if (index === 9) {
+                        cell.empty();
+                    }
+
+                    editImage.off("click").click(function () {
+                        var currentRow = $(this).closest('tr');
+
+                        var name = currentRow.find('td:eq(1) input').val();
+                        var title = currentRow.find('td:eq(2) input').val();
+                        var race = currentRow.find('td:eq(3) select').val();
+                        var profession = currentRow.find('td:eq(4) select').val();
+                        var banned = currentRow.find('td:eq(7) select').val();
+                        var requestData = {
+                            "name": name,
+                            "title": title,
+                            "race": race,
+                            "profession": profession,
+                            "banned": banned,
+                        };
+
+                        $.ajax({
+                            type: "POST",
+                            url: "/rest/players/" + item.id,
+                            contentType: "application/json",
+                            data: JSON.stringify(requestData),
+                            success: function (response) {
+                                getTotalElements();
+                            },
+                            error: function (error) {
+                                alert(error.message);
+                            }
+                        });
+                    });
+                });
+            });
+
+            deleteImage.click(function () {
+                var playerId = item.id;
+                $.ajax({
+                    type: 'DELETE',
+                    url: '/rest/players/' + playerId,
+                    success: function (response) {
+                        getTotalElements();
+                    },
+                    error: function (error) {
+                        alert('Error');
+                    }
+                });
+            });
+
+            newRow.append('<td>' + item.id + '</td>');
+            newRow.append('<td>' + item.name + '</td>');
+            newRow.append('<td>' + item.title + '</td>');
+            newRow.append('<td>' + item.race + '</td>');
+            newRow.append('<td>' + item.profession + '</td>');
+            newRow.append('<td>' + item.level + '</td>');
+            newRow.append('<td>' + birthdate + '</td>');
+            newRow.append('<td>' + item.banned + '</td>');
+            newRow.append($('<td>').append(editImage));
+            newRow.append($('<td>').append(deleteImage));
+
+            return newRow;
+        }
+
+        function createDropdown(options, selectedValue) {
+            var dropdown = $('<select>');
+
+            $.each(options, function (index, optionValue) {
+                var option = $('<option>').text(optionValue).attr('value', optionValue);
+                if (optionValue === selectedValue) {
+                    option.attr('selected', true);
+                }
+                dropdown.append(option);
+            });
+
+            return dropdown;
+        }
+
+        $('#createPlayerButton').on('click', function () {
+            var newName = $('#newPlayerName').val();
+            var newTitle = $('#newPlayerTitle').val();
+            var newRace = $('#newPlayerRace').val();
+            var newProfession = $('#newPlayerProfession').val();
+            var newLevel = $('#newPlayerLevel').val();
+            var newBirthday = $('#newPlayerBirthday').val();
+            var newBanned = $('#newPlayerBanned').val();
+
+            var date = new Date(newBirthday);
+
+            if (!newName || !newTitle || !newRace || !newProfession || !newLevel || !newBirthday || !newBanned) {
+                alert('Fill in all fields.');
+                return;
+            }
+
+            if (newName.length > 12 || newTitle.length > 30) {
+                alert('Name and Title should not exceed 12 and 30 characters, respectively.');
+                return;
+            }
+
+            if (newLevel < 0 || newLevel > 100) {
+                alert('Level should be between 0 and 100.');
+                return;
+            }
+
+
+            var newPlayerData = {
+                "name": newName,
+                "title": newTitle,
+                "race": newRace,
+                "profession": newProfession,
+                "level": newLevel,
+                "birthday": date.getTime(),
+                "banned": newBanned
+            };
+
+            $.ajax({
+                type: "POST",
+                url: "/rest/players",
+                contentType: "application/json",
+                data: JSON.stringify(newPlayerData),
+                success: function (response) {
+                    getTotalElements();
+                },
+                error: function (error) {
+                    alert(error.message);
+                }
+            });
+        });
+
+        getTotalElements();
+    });
+</script>
 </body>
 </html>

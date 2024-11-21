@@ -6,6 +6,64 @@
 </head>
 <body>
 <h1>RPG admin panel</h1>
+<table id = "playersTable">
+    <tr>
+        <th scope="col">#</th>
+        <th scope="col">Name</th>
+        <th scope="col">Title</th>
+        <th scope="col">Race</th>
+        <th scope="col">Profession</th>
+        <th scope="col">Level</th>
+        <th scope="col">Birthday</th>
+        <th scope="col">Banned</th>
+    </tr>
+    <tr>
+    </tr>
+</table>
+<script>
+    async function fetchPlayers() {
+        try {
+            const response = await fetch('/rest/players');
+            if (!response.ok) {
+                throw new Error('No response from server');
+            }
+            const players = await response.json();
+            const playersWithDate = players.map(player => {
+                return {
+                id:player.id,
+                name: player.name,
+                title: player.title,
+                race:player.race,
+                profession:player.profession,
+                level:player.level,
+                birthday: new Date(player.birthday).toJSON().slice(0,10),
+                banned:player.banned
+                };
+            });
+            displayPlayers(playersWithDate);
+        } catch (error) {
+            console.error('Error occurred during data fetch:', error);
+        }
+    }
 
+    function displayPlayers(players) {
+        const tableBody = document.querySelector('#playersTable tbody');
+        players.forEach(player => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                    <td>${player.id}</td>
+                    <td>${player.name}</td>
+                    <td>${player.title}</td>
+                    <td>${player.race}</td>
+                    <td>${player.profession}</td>
+                     <td>${player.level}</td>
+                    <td>${player.birthday}</td>
+                    <td>${player.banned}</td>
+                `;
+            tableBody.appendChild(row);
+        });
+    }
+    document.addEventListener('DOMContentLoaded', fetchPlayers);
+</script>
 </body>
 </html>

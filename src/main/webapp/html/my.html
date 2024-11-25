@@ -1,69 +1,153 @@
-<html>
-<head>
-    <title>RPG</title>
-    <script src=https://code.jquery.com/jquery-3.6.0.min.js></script>
-    <link href="/css/my.css" rel="stylesheet">
-</head>
-<body>
-<h1>RPG admin panel</h1>
-<table id = "playersTable">
-    <tr>
-        <th scope="col">#</th>
-        <th scope="col">Name</th>
-        <th scope="col">Title</th>
-        <th scope="col">Race</th>
-        <th scope="col">Profession</th>
-        <th scope="col">Level</th>
-        <th scope="col">Birthday</th>
-        <th scope="col">Banned</th>
-    </tr>
-    <tr>
-    </tr>
-</table>
-<script>
-    async function fetchPlayers() {
-        try {
-            const response = await fetch('/rest/players');
-            if (!response.ok) {
-                throw new Error('No response from server');
+    <html lang="en">
+    <head>
+        <title>RPG</title>
+        <script src=https://code.jquery.com/jquery-3.6.0.min.js></script>
+        <link href="/css/my.css" rel="stylesheet">
+        <style>
+            table {
+                width: 100%;
+                border-collapse: collapse;
             }
-            const players = await response.json();
-            const playersWithDate = players.map(player => {
-                return {
-                id:player.id,
-                name: player.name,
-                title: player.title,
-                race:player.race,
-                profession:player.profession,
-                level:player.level,
-                birthday: new Date(player.birthday).toJSON().slice(0,10),
-                banned:player.banned
-                };
-            });
-            displayPlayers(playersWithDate);
-        } catch (error) {
-            console.error('Error occurred during data fetch:', error);
-        }
-    }
 
-    function displayPlayers(players) {
-        const tableBody = document.querySelector('#playersTable tbody');
-        players.forEach(player => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                    <td>${player.id}</td>
-                    <td>${player.name}</td>
-                    <td>${player.title}</td>
-                    <td>${player.race}</td>
-                    <td>${player.profession}</td>
-                     <td>${player.level}</td>
-                    <td>${player.birthday}</td>
-                    <td>${player.banned}</td>
-                `;
-            tableBody.appendChild(row);
+            th, td {
+                border: 1px solid #ddd;
+                padding: 8px;
+            }
+
+            th {
+                background-color: #f2f2f2;
+            }
+
+            .pagination {
+                margin-top: 20px;
+            }
+
+            .pagination button {
+                margin: 5px;
+            }
+            .image-button {
+                display: block;
+                margin: 0 auto;
+                padding: 0;
+                border: none;
+                background: none;
+            }
+        </style>
+    </head>
+    <body>
+    <h1>RPG admin panel</h1>
+    <form>
+        <label for="playersPerPageList">Players per page:</label>
+        <select id="playersPerPageList" name="options">
+            <option value="10">10</option>
+            <option value="8">8</option>
+            <option value="6">6</option>
+            <option value="4">4</option>
+            <option value="2">2</option>
+        </select>
+    </form>
+    <table id="players-table">
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Title</th>
+            <th>Race</th>
+            <th>Profession</th>
+            <th>Level</th>
+            <th>Birthday</th>
+            <th>Banned</th>
+            <th>Edit</th>
+            <th>Delete</th>
+        </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+    <div class="pagination">
+        <!-- Pagination buttons -->
+    </div>
+    <script>
+        let playersPerPage = 10;
+        let currentPage = 0;
+
+        function deletePlayer() {
+
+
+        }
+
+        function setCurrentPage() {
+            $('#playersPerPageList').change(function () {
+                playersPerPage = $('#playersPerPageList').val();
+                currentPage = 0;
+                loadPlayers(currentPage);
+            })
+        }
+
+        function loadPlayers(page) {
+            $.get(`/rest/players?pageNumber=${page}&pageSize=${playersPerPage}`, function (data) {
+                const playersTableBody = $('#players-table tbody');
+                playersTableBody.empty();
+                data.forEach(player => {
+                    playersTableBody.append(`
+                        <tr>
+                        <td>${player.id}</td>
+                        <td>${player.name}</td>
+                        <td>${player.title}</td>
+                        <td>${player.race}</td>
+                        <td>${player.profession}</td>
+                        <td>${player.level}</td>
+                        <td>${formatTimestamp(player.birthday)}</td>
+                        <td>${player.banned}</td>
+                        <td>
+                            <button class="image-button" onclick="alert('Button clicked!')">
+                                <img src="img/edit.png" alt="edit">
+                            </button>
+                        </td>
+                        <td>
+                            <button class="image-button" onclick="alert('Button clicked!')">
+                                <img src="img/delete.png" alt="delete">
+                            </button>
+                        </td>
+                        </tr>
+                    `);
+                });
+
+                loadPlayerCount();
+            });
+        }
+
+        function formatTimestamp(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleDateString('ru-RU');
+        }
+
+        function loadPlayerCount() {
+            $.get('/rest/players/count', function (count) {
+                const totalPages = Math.ceil(count / playersPerPage);
+                $('.pagination').empty();
+                for (let i = 0; i < totalPages; i++) {
+                    if (i === currentPage) {
+                        $('.pagination').append(`
+                        <button class="page-button" data-page="${i}" style="color:red">${i + 1}</button>
+                    `);
+                    } else {
+                        $('.pagination').append(`
+                        <button class="page-button" data-page="${i}">${i + 1}</button>
+                    `);
+                    }
+                }
+                $('.page-button').on('click', function () {
+                    currentPage = $(this).data('page');
+                    loadPlayers(currentPage);
+                });
+            });
+        }
+
+        $(document).ready(function () {
+            loadPlayers(currentPage);
+            setCurrentPage();
         });
-    }
-    document.addEventListener('DOMContentLoaded', fetchPlayers);
-</script>
-</body>
-</html>
+    </script>
+    </body>
+    </html>

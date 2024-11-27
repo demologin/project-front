@@ -1,95 +1,133 @@
-    <html lang="en">
-    <head>
-        <title>RPG</title>
-        <script src=https://code.jquery.com/jquery-3.6.0.min.js></script>
-        <link href="/css/my.css" rel="stylesheet">
-        <style>
-            table {
-                width: 100%;
-                border-collapse: collapse;
-            }
-
-            th, td {
-                border: 1px solid #ddd;
-                padding: 8px;
-            }
-
-            th {
-                background-color: #f2f2f2;
-            }
-
-            .pagination {
-                margin-top: 20px;
-            }
-
-            .pagination button {
-                margin: 5px;
-            }
-            .image-button {
-                display: block;
-                margin: 0 auto;
-                padding: 0;
-                border: none;
-                background: none;
-            }
-        </style>
-    </head>
-    <body>
-    <h1>RPG admin panel</h1>
-    <form>
-        <label for="playersPerPageList">Players per page:</label>
-        <select id="playersPerPageList" name="options">
-            <option value="10">10</option>
-            <option value="8">8</option>
-            <option value="6">6</option>
-            <option value="4">4</option>
-            <option value="2">2</option>
-        </select>
-    </form>
-    <table id="players-table">
-        <thead>
-        <tr>
-            <th>#</th>
-            <th>Name</th>
-            <th>Title</th>
-            <th>Race</th>
-            <th>Profession</th>
-            <th>Level</th>
-            <th>Birthday</th>
-            <th>Banned</th>
-            <th>Edit</th>
-            <th>Delete</th>
-        </tr>
-        </thead>
-        <tbody>
-        </tbody>
-    </table>
-    <div class="pagination">
-        <!-- Pagination buttons -->
-    </div>
-    <script>
-        let playersPerPage = 10;
-        let currentPage = 0;
-
-        function deletePlayer() {
-
-
+<html lang="en">
+<head>
+    <title>RPG</title>
+    <script src=https://code.jquery.com/jquery-3.6.0.min.js></script>
+    <link href="/css/my.css" rel="stylesheet">
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
         }
 
-        function setCurrentPage() {
-            $('#playersPerPageList').change(function () {
-                playersPerPage = $('#playersPerPageList').val();
-                currentPage = 0;
-                loadPlayers(currentPage);
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .pagination {
+            margin-top: 20px;
+        }
+
+        .pagination button {
+            margin: 5px;
+        }
+
+        .delete-button {
+            display: block;
+            margin: 0 auto;
+            padding: 0;
+            border: none;
+            background: none;
+        }
+
+        .edit-button {
+            display: block;
+            margin: 0 auto;
+            padding: 0;
+            border: none;
+            background: none;
+        }
+    </style>
+</head>
+<body>
+<h1>RPG admin panel</h1>
+<form>
+    <label for="playersPerPageList">Players per page:</label>
+    <select id="playersPerPageList" name="options">
+        <option value="10">10</option>
+        <option value="8">8</option>
+        <option value="6">6</option>
+        <option value="4">4</option>
+        <option value="2">2</option>
+    </select>
+</form>
+<table id="players-table">
+    <thead>
+    <tr>
+        <th>#</th>
+        <th>Name</th>
+        <th>Title</th>
+        <th>Race</th>
+        <th>Profession</th>
+        <th>Level</th>
+        <th>Birthday</th>
+        <th>Banned</th>
+        <th>Edit</th>
+        <th>Delete</th>
+    </tr>
+    </thead>
+    <tbody>
+    <!-- Table body -->
+    </tbody>
+</table>
+<div class="pagination">
+    <!-- Pagination buttons -->
+</div>
+<script>
+    let playersPerPage = 10;
+    let currentPage = 0;
+
+    function updatePlayer() {
+        $.post('https://example.com/api', {
+            key1: 'value1',
+            key2: 'value2'
+        })
+            .done(function(response) {
+                console.log('Успех:', response); // Обработка успешного ответа
             })
-        }
+            .fail(function(xhr, status, error) {
+                console.log('Ошибка:', error); // Обработка ошибки
+            });
+    }
 
-        function loadPlayers(page) {
-            $.get(`/rest/players?pageNumber=${page}&pageSize=${playersPerPage}`, function (data) {
-                const playersTableBody = $('#players-table tbody');
-                playersTableBody.empty();
-                data.forEach(player => {
-                    playersTableBody.append(`
+    function deletePlayer() {
+        $('#players-table').on('click', '.delete-button', function(event) {
+            event.preventDefault();
+            var $row = $(this).closest('tr');
+            var playerId = $row.find('td:first').text(); // Получение содержимого первой ячейки строки
+
+            $.ajax({
+                url: '/rest/players/' + playerId, // Замените на ваш URL
+                type: 'DELETE',
+                success: function(response) {
+                    console.log('Player deleted successfully', response);
+                    loadPlayers(currentPage);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                }
+            });
+        });
+    }
+
+    function setCurrentPage() {
+        $('#playersPerPageList').change(function () {
+            playersPerPage = $('#playersPerPageList').val();
+            currentPage = 0;
+            loadPlayers(currentPage);
+        })
+    }
+
+    function loadPlayers(page) {
+        $.get(`/rest/players?pageNumber=${page}&pageSize=${playersPerPage}`, function (data) {
+            const playersTableBody = $('#players-table tbody');
+            playersTableBody.empty();
+            data.forEach(player => {
+                playersTableBody.append(`
                         <tr>
                         <td>${player.id}</td>
                         <td>${player.name}</td>
@@ -100,54 +138,55 @@
                         <td>${formatTimestamp(player.birthday)}</td>
                         <td>${player.banned}</td>
                         <td>
-                            <button class="image-button" onclick="alert('Button clicked!')">
+                            <button class="edit-button" onclick="alert('Button clicked!')">
                                 <img src="img/edit.png" alt="edit">
                             </button>
                         </td>
                         <td>
-                            <button class="image-button" onclick="alert('Button clicked!')">
+                            <button class="delete-button">
                                 <img src="img/delete.png" alt="delete">
                             </button>
                         </td>
                         </tr>
                     `);
-                });
-
-                loadPlayerCount();
             });
-        }
 
-        function formatTimestamp(timestamp) {
-            const date = new Date(timestamp);
-            return date.toLocaleDateString('ru-RU');
-        }
+            loadPlayerCount();
+        });
+    }
 
-        function loadPlayerCount() {
-            $.get('/rest/players/count', function (count) {
-                const totalPages = Math.ceil(count / playersPerPage);
-                $('.pagination').empty();
-                for (let i = 0; i < totalPages; i++) {
-                    if (i === currentPage) {
-                        $('.pagination').append(`
+    function formatTimestamp(timestamp) {
+        const date = new Date(timestamp);
+        return date.toLocaleDateString('ru-RU');
+    }
+
+    function loadPlayerCount() {
+        $.get('/rest/players/count', function (count) {
+            const totalPages = Math.ceil(count / playersPerPage);
+            $('.pagination').empty();
+            for (let i = 0; i < totalPages; i++) {
+                if (i === currentPage) {
+                    $('.pagination').append(`
                         <button class="page-button" data-page="${i}" style="color:red">${i + 1}</button>
                     `);
-                    } else {
-                        $('.pagination').append(`
+                } else {
+                    $('.pagination').append(`
                         <button class="page-button" data-page="${i}">${i + 1}</button>
                     `);
-                    }
                 }
-                $('.page-button').on('click', function () {
-                    currentPage = $(this).data('page');
-                    loadPlayers(currentPage);
-                });
+            }
+            $('.page-button').on('click', function () {
+                currentPage = $(this).data('page');
+                loadPlayers(currentPage);
             });
-        }
-
-        $(document).ready(function () {
-            loadPlayers(currentPage);
-            setCurrentPage();
         });
-    </script>
-    </body>
-    </html>
+    }
+
+    $(document).ready(function () {
+        loadPlayers(currentPage);
+        setCurrentPage();
+        deletePlayer();
+    });
+</script>
+</body>
+</html>

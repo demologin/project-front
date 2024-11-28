@@ -30,7 +30,6 @@
             display: block;
             margin: 0 auto;
             padding: 0;
-            border: none;
             background: none;
         }
 
@@ -38,8 +37,19 @@
             display: block;
             margin: 0 auto;
             padding: 0;
-            border: none;
             background: none;
+        }
+
+        .save-button {
+            display: block;
+            margin: 0 auto;
+            padding: 0;
+            background: none;
+        }
+        .read-cell {
+            border: none;
+            background-color: transparent;
+            color: black;
         }
     </style>
 </head>
@@ -81,21 +91,55 @@
     let playersPerPage = 10;
     let currentPage = 0;
 
-    function updatePlayer() {
-        $.post('https://example.com/api', {
-            key1: 'value1',
-            key2: 'value2'
-        })
-            .done(function(response) {
-                console.log('Успех:', response); // Обработка успешного ответа
-            })
-            .fail(function(xhr, status, error) {
-                console.log('Ошибка:', error); // Обработка ошибки
-            });
+    function editPlayer() {
+        $('#players-table').on('click', '.edit-button', function (event) {
+            event.preventDefault();
+            var row = $(this).closest('tr');
+
+            const inputs = row.find('input, select');
+            inputs.prop('disabled', false);
+            inputs.addClass('editable-cell');
+
+            var currentCell = $(this).parent();
+            var saveButton = $(this).siblings('.save-button');
+
+            $(this).hide();
+            saveButton.show();
+        });
     }
 
+    function sendPlayerUpdate() {
+        $('#players-table').on('click', '.save-button', function (event) {
+            event.preventDefault();
+            var row = $(this).closest('tr');
+            const inputs = row.find('input, select');
+
+            const data = {};
+            Array.from(inputs).forEach(input => {
+                data[input.name] = input.value;
+            });
+
+            var playerId = row.find('td:first').text();
+
+            $.ajax({
+            url: `/rest/players/${playerId}`,
+            type: 'POST',
+            data: JSON.stringify(data),
+            contentType: 'application/json',
+            success: function(result) {
+                alert('Success!');
+                loadPlayers(currentPage);
+            },
+            error: function(xhr, statusText) {
+                console.log('Error:', xhr.responseJSON.message);
+            }
+        });
+    });
+}
+
+
     function deletePlayer() {
-        $('#players-table').on('click', '.delete-button', function(event) {
+        $('#players-table').on('click', '.delete-button', function (event) {
             event.preventDefault();
             var $row = $(this).closest('tr');
             var playerId = $row.find('td:first').text(); // Получение содержимого первой ячейки строки
@@ -103,11 +147,11 @@
             $.ajax({
                 url: '/rest/players/' + playerId, // Замените на ваш URL
                 type: 'DELETE',
-                success: function(response) {
+                success: function (response) {
                     console.log('Player deleted successfully', response);
                     loadPlayers(currentPage);
                 },
-                error: function(xhr, status, error) {
+                error: function (xhr, status, error) {
                     console.error('Error:', error);
                 }
             });
@@ -129,17 +173,43 @@
             data.forEach(player => {
                 playersTableBody.append(`
                         <tr>
-                        <td>${player.id}</td>
-                        <td>${player.name}</td>
-                        <td>${player.title}</td>
-                        <td>${player.race}</td>
-                        <td>${player.profession}</td>
-                        <td>${player.level}</td>
-                        <td>${formatTimestamp(player.birthday)}</td>
-                        <td>${player.banned}</td>
+                        <td class="id">${player.id}</td>
+                        <td><input name="name" type="text" minlength="1" maxlength="12" value="${player.name}" class="read-cell" disabled></td>
+                        <td><input name="title" type="text" minlength="1" maxlength="30" value="${player.title}" class="read-cell" disabled></td>
                         <td>
-                            <button class="edit-button" onclick="alert('Button clicked!')">
+                                        <select name="race" class="read-cell" disabled>
+                                            <option value="${player.race}" selected disabled hidden>${player.race}</option>
+                                            <option value="HUMAN">HUMAN</option>
+                                            <option value="DWARF">DWARF</option>
+                                            <option value="ELF">ELF</option>
+                                            <option value="GIANT">GIANT</option>
+                                            <option value="ORC">ORC</option>
+                                            <option value="TROLL">TROLL</option>
+                                            <option value="HOBBIT">HOBBIT</option>
+                                        </select>
+                        </td>
+                        <td>
+                                        <select name="profession" class="read-cell" disabled>
+                                            <option value="${player.profession}" selected disabled hidden>${player.profession}</option>
+                                            <option value="WARRIOR">WARRIOR</option>
+                                            <option value="ROGUE">ROGUE</option>
+                                            <option value="SORCERER">SORCERER</option>
+                                            <option value="CLERIC">CLERIC</option>
+                                            <option value="PALADIN">PALADIN</option>
+                                            <option value="NAZGUL">NAZGUL</option>
+                                            <option value="WARLOCK">WARLOCK</option>
+                                            <option value="DRUID">DRUID</option>
+                                        </select>
+                        </td>
+                        <td class="level">${player.level}</td>
+                        <td class="birthday">${formatTimestamp(player.birthday)}</td>
+                        <td class="banned"><input name="banned" type="checkbox" value=${player.banned}  class="read-cell" disabled></td>
+                        <td>
+                            <button class="edit-button">
                                 <img src="img/edit.png" alt="edit">
+                            </button>
+                             <button class="save-button" style="display: none;">
+                                <img src="img/save.png" alt="save">
                             </button>
                         </td>
                         <td>
@@ -150,14 +220,22 @@
                         </tr>
                     `);
             });
-
             loadPlayerCount();
         });
     }
 
     function formatTimestamp(timestamp) {
-        const date = new Date(timestamp);
-        return date.toLocaleDateString('ru-RU');
+        const d = new Date(timestamp);
+        var day = d.getDate();
+        var month = d.getMonth() + 1;
+        var year = d.getFullYear();
+        if (day < 10) {
+            day = "0" + day;
+        }
+        if (month < 10) {
+            month = "0" + month;
+        }
+        return year + "-" + month + "-" + day
     }
 
     function loadPlayerCount() {
@@ -186,6 +264,8 @@
         loadPlayers(currentPage);
         setCurrentPage();
         deletePlayer();
+        editPlayer();
+        sendPlayerUpdate();
     });
 </script>
 </body>

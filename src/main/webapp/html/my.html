@@ -46,6 +46,7 @@
             padding: 0;
             background: none;
         }
+
         .read-cell {
             border: none;
             background-color: transparent;
@@ -87,9 +88,76 @@
 <div class="pagination">
     <!-- Pagination buttons -->
 </div>
+
+<div>
+    <h2>Character Form</h2>
+    <label for="create-name">Name:</label>
+    <input type="text" id="create-name" maxlength="12" required>
+    <label for="create-title">Title:</label>
+    <input type="text" id="create-title" maxlength="30" required>
+    <label for="create-race">Race:</label>
+    <select id="create-race">
+        <option value="HUMAN">HUMAN</option>
+        <option value="DWARF">DWARF</option>
+        <option value="ELF">ELF</option>
+        <option value="GIANT">GIANT</option>
+        <option value="ORC">ORC</option>
+        <option value="TROLL">TROLL</option>
+        <option value="HOBBIT">HOBBIT</option>
+    </select>
+    <label for="create-profession">Profession:</label>
+    <select id="create-profession">
+        <option value="WARRIOR">WARRIOR</option>
+        <option value="ROGUE">ROGUE</option>
+        <option value="SORCERER">SORCERER</option>
+        <option value="CLERIC">CLERIC</option>
+        <option value="PALADIN">PALADIN</option>
+        <option value="NAZGUL">NAZGUL</option>
+        <option value="WARLOCK">WARLOCK</option>
+        <option value="DRUID">DRUID</option>
+    </select>
+    <label for="create-level">Level:</label>
+    <input type="number" id="create-level" min="0" max="100" required>
+    <label for="create-birthday">Birthday:</label>
+    <input type="date" id="create-birthday" required>
+    <label for="create-banned">Banned:</label>
+    <input type="checkbox" id="create-banned">
+    <button id="create-button">Create</button>
+</div>
 <script>
     let playersPerPage = 10;
     let currentPage = 0;
+
+    function createPlayer() {
+        $(document).ready(function() {
+            $('#create-button').click(function(event) {
+                event.preventDefault();
+                const data = {
+                    name: $('#create-name').val(),
+                    title: $('#create-title').val(),
+                    race: $('#create-race').val(),
+                    profession: $('#create-profession').val(),
+                    level: $('#create-level').val(),
+                    birthday: new Date($('#create-birthday').val()).getTime(),
+                    banned: $('#create-banned').is(':checked')
+                };
+
+                $.ajax({
+                    url: `/rest/players`,
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(data),
+                    success: function(response) {
+                        console.log('Player created successfully:', response);
+                        loadPlayers(currentPage);
+                    },
+                    error: function(error) {
+                        console.error('Error creating player:', error);
+                    }
+                });
+            });
+        });
+    }
 
     function editPlayer() {
         $('#players-table').on('click', '.edit-button', function (event) {
@@ -121,20 +189,20 @@
             var playerId = row.find('td:first').text();
 
             $.ajax({
-            url: `/rest/players/${playerId}`,
-            type: 'POST',
-            data: JSON.stringify(data),
-            contentType: 'application/json',
-            success: function(result) {
-                alert('Success!');
-                loadPlayers(currentPage);
-            },
-            error: function(xhr, statusText) {
-                console.log('Error:', xhr.responseJSON.message);
-            }
+                url: `/rest/players/${playerId}`,
+                type: 'POST',
+                data: JSON.stringify(data),
+                contentType: 'application/json',
+                success: function (result) {
+                    alert('Success!');
+                    loadPlayers(currentPage);
+                },
+                error: function (xhr, statusText) {
+                    console.log('Error:', xhr.responseJSON.message);
+                }
+            });
         });
-    });
-}
+    }
 
 
     function deletePlayer() {
@@ -265,6 +333,7 @@
         deletePlayer();
         editPlayer();
         sendPlayerUpdate();
+        createPlayer();
     });
 </script>
 </body>

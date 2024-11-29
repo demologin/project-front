@@ -1,11 +1,340 @@
-<html>
+<html lang="en">
 <head>
     <title>RPG</title>
     <script src=https://code.jquery.com/jquery-3.6.0.min.js></script>
     <link href="/css/my.css" rel="stylesheet">
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .pagination {
+            margin-top: 20px;
+        }
+
+        .pagination button {
+            margin: 5px;
+        }
+
+        .delete-button {
+            display: block;
+            margin: 0 auto;
+            padding: 0;
+            background: none;
+        }
+
+        .edit-button {
+            display: block;
+            margin: 0 auto;
+            padding: 0;
+            background: none;
+        }
+
+        .save-button {
+            display: block;
+            margin: 0 auto;
+            padding: 0;
+            background: none;
+        }
+
+        .read-cell {
+            border: none;
+            background-color: transparent;
+            color: black;
+        }
+    </style>
 </head>
 <body>
 <h1>RPG admin panel</h1>
+<form>
+    <label for="playersPerPageList">Players per page:</label>
+    <select id="playersPerPageList" name="options">
+        <option value="10">10</option>
+        <option value="8">8</option>
+        <option value="6">6</option>
+        <option value="4">4</option>
+        <option value="2">2</option>
+    </select>
+</form>
+<table id="players-table">
+    <thead>
+    <tr>
+        <th>#</th>
+        <th>Name</th>
+        <th>Title</th>
+        <th>Race</th>
+        <th>Profession</th>
+        <th>Level</th>
+        <th>Birthday</th>
+        <th>Banned</th>
+        <th>Edit</th>
+        <th>Delete</th>
+    </tr>
+    </thead>
+    <tbody>
+    <!-- Table body -->
+    </tbody>
+</table>
+<div class="pagination">
+    <!-- Pagination buttons -->
+</div>
 
+<div>
+    <h2>Character Form</h2>
+    <label for="create-name">Name:</label>
+    <input type="text" id="create-name" maxlength="12" required>
+    <label for="create-title">Title:</label>
+    <input type="text" id="create-title" maxlength="30" required>
+    <label for="create-race">Race:</label>
+    <select id="create-race">
+        <option value="HUMAN">HUMAN</option>
+        <option value="DWARF">DWARF</option>
+        <option value="ELF">ELF</option>
+        <option value="GIANT">GIANT</option>
+        <option value="ORC">ORC</option>
+        <option value="TROLL">TROLL</option>
+        <option value="HOBBIT">HOBBIT</option>
+    </select>
+    <label for="create-profession">Profession:</label>
+    <select id="create-profession">
+        <option value="WARRIOR">WARRIOR</option>
+        <option value="ROGUE">ROGUE</option>
+        <option value="SORCERER">SORCERER</option>
+        <option value="CLERIC">CLERIC</option>
+        <option value="PALADIN">PALADIN</option>
+        <option value="NAZGUL">NAZGUL</option>
+        <option value="WARLOCK">WARLOCK</option>
+        <option value="DRUID">DRUID</option>
+    </select>
+    <label for="create-level">Level:</label>
+    <input type="number" id="create-level" min="0" max="100" required>
+    <label for="create-birthday">Birthday:</label>
+    <input type="date" id="create-birthday" required>
+    <label for="create-banned">Banned:</label>
+    <input type="checkbox" id="create-banned">
+    <button id="create-button">Create</button>
+</div>
+<script>
+    let playersPerPage = 10;
+    let currentPage = 0;
+
+    function createPlayer() {
+        $(document).ready(function() {
+            $('#create-button').click(function(event) {
+                event.preventDefault();
+                const data = {
+                    name: $('#create-name').val(),
+                    title: $('#create-title').val(),
+                    race: $('#create-race').val(),
+                    profession: $('#create-profession').val(),
+                    level: $('#create-level').val(),
+                    birthday: new Date($('#create-birthday').val()).getTime(),
+                    banned: $('#create-banned').is(':checked')
+                };
+
+                $.ajax({
+                    url: `/rest/players`,
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(data),
+                    success: function(response) {
+                        console.log('Player created successfully:', response);
+                        loadPlayers(currentPage);
+                    },
+                    error: function(error) {
+                        console.error('Error creating player:', error);
+                    }
+                });
+            });
+        });
+    }
+
+    function editPlayer() {
+        $('#players-table').on('click', '.edit-button', function (event) {
+            event.preventDefault();
+            var row = $(this).closest('tr');
+
+            const inputs = row.find('input, select');
+            inputs.prop('disabled', false);
+            inputs.addClass('editable-cell');
+
+            var saveButton = $(this).siblings('.save-button');
+
+            $(this).hide();
+            saveButton.show();
+        });
+    }
+
+    function sendPlayerUpdate() {
+        $('#players-table').on('click', '.save-button', function (event) {
+            event.preventDefault();
+            var row = $(this).closest('tr');
+            const inputs = row.find('input, select');
+
+            const data = {};
+            Array.from(inputs).forEach(input => {
+                data[input.name] = input.value;
+            });
+
+            var playerId = row.find('td:first').text();
+
+            $.ajax({
+                url: `/rest/players/${playerId}`,
+                type: 'POST',
+                data: JSON.stringify(data),
+                contentType: 'application/json',
+                success: function (result) {
+                    alert('Success!');
+                    loadPlayers(currentPage);
+                },
+                error: function (xhr, statusText) {
+                    console.log('Error:', xhr.responseJSON.message);
+                }
+            });
+        });
+    }
+
+
+    function deletePlayer() {
+        $('#players-table').on('click', '.delete-button', function (event) {
+            event.preventDefault();
+            var $row = $(this).closest('tr');
+            var playerId = $row.find('td:first').text(); // Получение содержимого первой ячейки строки
+
+            $.ajax({
+                url: '/rest/players/' + playerId, // Замените на ваш URL
+                type: 'DELETE',
+                success: function (response) {
+                    console.log('Player deleted successfully', response);
+                    loadPlayers(currentPage);
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error:', error);
+                }
+            });
+        });
+    }
+
+    function setCurrentPage() {
+        $('#playersPerPageList').change(function () {
+            playersPerPage = $('#playersPerPageList').val();
+            currentPage = 0;
+            loadPlayers(currentPage);
+        })
+    }
+
+    function loadPlayers(page) {
+        $.get(`/rest/players?pageNumber=${page}&pageSize=${playersPerPage}`, function (data) {
+            const playersTableBody = $('#players-table tbody');
+            playersTableBody.empty();
+            data.forEach(player => {
+                playersTableBody.append(`
+                        <tr>
+                        <td class="id">${player.id}</td>
+                        <td><input name="name" type="text" minlength="1" maxlength="12" value="${player.name}" class="read-cell" disabled></td>
+                        <td><input name="title" type="text" minlength="1" maxlength="30" value="${player.title}" class="read-cell" disabled></td>
+                        <td>
+                                        <select name="race" class="read-cell" disabled>
+                                            <option value="${player.race}" selected disabled hidden>${player.race}</option>
+                                            <option value="HUMAN">HUMAN</option>
+                                            <option value="DWARF">DWARF</option>
+                                            <option value="ELF">ELF</option>
+                                            <option value="GIANT">GIANT</option>
+                                            <option value="ORC">ORC</option>
+                                            <option value="TROLL">TROLL</option>
+                                            <option value="HOBBIT">HOBBIT</option>
+                                        </select>
+                        </td>
+                        <td>
+                                        <select name="profession" class="read-cell" disabled>
+                                            <option value="${player.profession}" selected disabled hidden>${player.profession}</option>
+                                            <option value="WARRIOR">WARRIOR</option>
+                                            <option value="ROGUE">ROGUE</option>
+                                            <option value="SORCERER">SORCERER</option>
+                                            <option value="CLERIC">CLERIC</option>
+                                            <option value="PALADIN">PALADIN</option>
+                                            <option value="NAZGUL">NAZGUL</option>
+                                            <option value="WARLOCK">WARLOCK</option>
+                                            <option value="DRUID">DRUID</option>
+                                        </select>
+                        </td>
+                        <td class="level">${player.level}</td>
+                        <td class="birthday">${formatTimestamp(player.birthday)}</td>
+                        <td class="banned"><input name="banned" type="checkbox" value=${player.banned}  class="read-cell" disabled></td>
+                        <td>
+                            <button class="edit-button">
+                                <img src="img/edit.png" alt="edit">
+                            </button>
+                             <button class="save-button" style="display: none;">
+                                <img src="img/save.png" alt="save">
+                            </button>
+                        </td>
+                        <td>
+                            <button class="delete-button">
+                                <img src="img/delete.png" alt="delete">
+                            </button>
+                        </td>
+                        </tr>
+                    `);
+            });
+            loadPlayerCount();
+        });
+    }
+
+    function formatTimestamp(timestamp) {
+        const d = new Date(timestamp);
+        var day = d.getDate();
+        var month = d.getMonth() + 1;
+        var year = d.getFullYear();
+        if (day < 10) {
+            day = "0" + day;
+        }
+        if (month < 10) {
+            month = "0" + month;
+        }
+        return year + "-" + month + "-" + day
+    }
+
+    function loadPlayerCount() {
+        $.get('/rest/players/count', function (count) {
+            const totalPages = Math.ceil(count / playersPerPage);
+            $('.pagination').empty();
+            for (let i = 0; i < totalPages; i++) {
+                if (i === currentPage) {
+                    $('.pagination').append(`
+                        <button class="page-button" data-page="${i}" style="color:red">${i + 1}</button>
+                    `);
+                } else {
+                    $('.pagination').append(`
+                        <button class="page-button" data-page="${i}">${i + 1}</button>
+                    `);
+                }
+            }
+            $('.page-button').on('click', function () {
+                currentPage = $(this).data('page');
+                loadPlayers(currentPage);
+            });
+        });
+    }
+
+    $(document).ready(function () {
+        loadPlayers(currentPage);
+        setCurrentPage();
+        deletePlayer();
+        editPlayer();
+        sendPlayerUpdate();
+        createPlayer();
+    });
+</script>
 </body>
 </html>

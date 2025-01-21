@@ -1,0 +1,100 @@
+body {
+    background-image: url("/img/background.png");
+    background-repeat: repeat;
+    background-size: 100%;
+
+
+}
+
+label {
+
+    color: white;
+    text-align: center;
+
+
+}
+
+#RPG_admin, h2 {
+    color: #ffffff;
+    text-align: center;
+}
+
+table {
+    border: 1px solid rgba(223, 236, 241, 0.02);
+    width: 100%;
+    color: #ffffff;
+    align-items: center;
+    flex-direction: column;
+
+}
+
+th, td {
+    height: 50px;
+    vertical-align: bottom;
+    border: 1px solid rgba(183, 189, 239, 0.05);
+    padding: 15px;
+    text-align: left;
+    text-emphasis-color: white;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+th {
+    background-color: rgba(183, 189, 239, 0.02);
+}
+
+tr:hover {
+    color: #e3cb31;
+}
+.signup-form {
+
+    max-width: 600px;
+    border-radius: 10px;
+    border: 1px solid #e3cb31;
+    background-color: rgba(255, 255, 255, 0.11);
+align-items: center;
+}
+
+.form-header {
+    padding: 15px 0;
+    border-radius: 10px;
+    border-bottom: 1px solid #1f2020;
+}
+
+.form-header h1 {
+    font-size: 28px;
+    text-align: center;
+    color: #ffffff;
+}
+
+.row {
+    display: flex;
+    flex-direction: column;
+}
+.input-group{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    margin: 10px 5px;
+}
+label {
+    font-size: 17px;
+    font-weight: 500;
+}
+
+input[type="text"]
+{
+    font-size: 18px;
+    height: 34px;
+    padding-left: 10px;
+    padding-right: 10px;
+    color: #ffffff;
+    border: 1px solid #3199e3;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0);
+    outline: none;
+}
+.form-body {
+    background: rgba(255, 255, 255, 0.07);
+    padding:5px 10px;
+}
+
